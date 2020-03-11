@@ -1,56 +1,57 @@
 const path = require("path");
-const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
-module.exports = {
+const js = {
+  test: /\.js$/,
+  exclude: /node_modules/,
+  use: {
+    loader: "babel-loader",
+    options: {
+      presets: ["@babel/env", "@babel/react"]
+    }
+  }
+};
+
+const serverConfig = {
+  mode: "development",
+  target: "node",
+  node: {
+    __dirname: false
+  },
+  externals: [nodeExternals()],
   entry: {
-    bundle: "./src/index.js",
-    // server: "./server.js"
+    server: path.resolve(__dirname, "server.js")
+  },
+  module: {
+    rules: [js]
   },
   output: {
-    path: path.join(__dirname, "dist"),
-    publicPath: "/",
+    path: path.resolve(__dirname, "dist"),
     filename: "[name].js"
+  }
+};
+
+const clientConfig = {
+  mode: "development",
+  target: "web",
+  entry: {
+    client: path.resolve(__dirname, "src/index.js")
   },
-  // target: "node",
-  // node: {
-  //   // Need this when working with express, otherwise the build fails
-  //   __dirname: false, // if you don't put this is, __dirname
-  //   __filename: false // and __filename return blank or /
-  // },
-  // externals: [nodeExternals()], // Need this to avoid error when working with express
   module: {
-    rules: [
-      {
-        // Transpiles ES6-8 into ES5
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-      {
-        // Transpiles ES6-8 into ES5
-        test: /\.jsx$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-      // {
-      //   // Loads the javascript into html template provided
-      //   // Entry point is set below in HtmlWebPackPlugin in Plugins
-      //   test: /\.html$/,
-      //   use: [{ loader: "html-loader" }]
-      // }
-    ]
+    rules: [js]
+  },
+  output: {
+    path: path.resolve(__dirname, "dist/public"),
+    filename: "bundle.js"
   },
   plugins: [
     new HtmlWebPackPlugin({
       template: "./src/index.html",
-      // filename: "./index.html",
-      // excludeChunks: ["server"]
+      filename: "../index.html",
+      excludeChunks: ["server"]
     })
   ]
 };
+
+module.exports = [serverConfig, clientConfig];

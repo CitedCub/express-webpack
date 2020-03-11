@@ -2,4 +2,4 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./components/App";
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.hydrate(<App name="Client" />, document.getElementById("root"));
